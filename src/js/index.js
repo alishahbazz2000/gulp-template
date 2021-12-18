@@ -1,1 +1,1 @@
-alert("hello")
+console.log("welcome to project portfolio")
