@@ -22,7 +22,6 @@ const sass = gulpSass(nodeSass);
 // ******************************************
 // defined src variable file gulp
 // ******************************************
-
 const html = {
   input: "./*.html",
   output: "build/",
@@ -195,6 +194,7 @@ gulp.task("browser-sync", async function () {
   browserSync.init({
     server: {
       baseDir: "./build",
+      watch: true,
     },
   });
 });
@@ -202,33 +202,31 @@ gulp.task("browser-sync", async function () {
 // task watcher for gulp
 // ******************************************
 gulp.task("watcher", async function () {
+  // watch html
   gulp
     .watch(html.input)
     .on("change", gulp.series(["html-Compile", browserSync.reload]));
-  gulp
-    .watch(image.input)
-    .on("change", gulp.series(["minify-image", browserSync.reload]));
-  gulp
-    .watch(scss.input)
-    .on("change", gulp.series(["compile-scss", browserSync.reload]));
+  // watch javascript (customJs , module and library js)
   gulp
     .watch(javascript.input)
     .on("change", gulp.series(["compile-js", browserSync.reload]));
-  gulp
-    .watch(video.input)
-    .on("change", gulp.series(["video-compile", browserSync.reload]));
-  gulp
-    .watch(font.input)
-    .on("change", gulp.series(["compile-font", browserSync.reload]));
-  gulp
-    .watch(module_css.input)
-    .on("change", gulp.series(["compile-module-css", browserSync.reload]));
   gulp
     .watch(boot_js.input)
     .on(
       "change",
       gulp.series(["compile-javascript-bootstrap", browserSync.reload])
     );
+  // watch css (customCss , module and library js)
+  gulp
+    .watch(scss.input)
+    .on("change", gulp.series(["compile-scss", browserSync.reload]));
+  gulp
+    .watch(module_css.input)
+    .on("change", gulp.series(["compile-module-css", browserSync.reload]));
+  // watch assets (image,font,video)
+  gulp.watch(video.input, gulp.parallel("video-compile"));
+  gulp.watch(font.input, gulp.parallel("compile-font"));
+  gulp.watch(image.input, gulp.parallel("minify-image"));
 });
 // ******************************************
 // gulp dev task
@@ -237,9 +235,9 @@ gulp.task(
   "dev",
   gulp.series(
     "delete",
-    "minify-image",
     gulp.parallel([
       "html-Compile",
+      "minify-image",
       "compile-module-css",
       "compile-scss",
       "compile-javascript-bootstrap",
